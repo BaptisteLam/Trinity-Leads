@@ -1,0 +1,36 @@
+name = "trinity-leads"
+type = "javascript"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+compatibility_date = "2024-01-01"
+
+# Variables d'environnement
+[env.production]
+name = "trinity-leads-prod"
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+name = "trinity-leads-dev"
+vars = { ENVIRONMENT = "development" }
+
+# Secrets
+# Configurez avec: wrangler secret put ANTHROPIC_API_KEY
+# wrangler secret put GOOGLE_SHEETS_API_KEY
+
+[[r2_buckets]]
+binding = "LEADS_BUCKET"
+bucket_name = "trinity-leads"
+preview_bucket_name = "trinity-leads-preview"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = ""
+preview_id = ""
+
+[[durable_objects.bindings]]
+name = "LEADS_KV"
+class_name = "LeadsStore"
+script_name = "trinity-leads"
+environment = "production"

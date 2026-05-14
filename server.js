@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const scraperManager = require('./scrapers');
 const GuillaumeAI = require('./services/guillaume-ai');
+const googleSheetsDB = require('./services/google-sheets-db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,14 +25,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Routes
-app.get('/api/dashboard', (req, res) => {
-  const leads = scraperManager.getLeads();
-  res.json({
-    totalLeads: leads.length,
-    status: scraperManager.getStatus(),
-    leads: leads
-  });
+// Routes - avec Google Sheets
+app.get('/api/dashboard', async (req, res) => {
+  try {
+    const leads = await googleSheetsDB.getLeads();
+    const stats = await googleSheetsDB.getStats();
+    res.json({
+      totalLeads: leads.length,
+      status: scraperManager.getStatus(),
+      stats,
+      source: 'Google Sheets'
+    });
+  } catch (error) {
+    res.json({
+      totalLeads: 0,
+      status: scraperManager.getStatus(),
+      error: error.message
+    });
+  }
 });
 
 app.post('/api/scrape', async (req, res) => {
@@ -44,7 +55,6 @@ app.post('/api/scrape', async (req, res) => {
       leadsFound: 0
     });
 
-    // Le scraping continue en arrière-plan
     scraperProcess(scraperType);
   } catch (error) {
     res.status(500).json({
@@ -56,40 +66,55 @@ app.post('/api/scrape', async (req, res) => {
 
 app.post('/api/scrape/stop', (req, res) => {
   scraperManager.stopScraper();
-  res.json({
-    status: 'stopped',
-    message: 'Scraping arrêté'
-  });
+  res.json({ status: 'stopped', message: 'Scraping arrêté' });
 });
 
-app.get('/api/leads', (req, res) => {
-  const leads = scraperManager.getLeads();
-  res.json(leads);
-});
-
-app.post('/api/leads/add', (req, res) => {
+app.get('/api/leads', async (req, res) => {
   try {
-    const lead = req.body;
-    scraperManager.addLead(lead);
-    res.json({
-      status: 'success',
-      message: 'Lead ajouté',
-      totalLeads: scraperManager.getLeads().length
-    });
+    const leads = await googleSheetsDB.getLeads();
+    res.json(leads);
   } catch (error) {
-    res.status(400).json({
-      status: 'error',
-      message: error.message
-    });
+    res.json([]);
   }
 });
 
-app.post('/api/leads/reset', (req, res) => {
-  scraperManager.reset();
-  res.json({
-    status: 'success',
-    message: 'Tous les leads ont été supprimés'
-  });
+app.post('/api/leads/add', async (req, res) => {
+  try {
+    const lead = req.body;
+    scraperManager.addLead(lead);
+    await googleSheetsDB.addLead(lead);
+    const leads = await googleSheetsDB.getLeads();
+    res.json({
+      status: 'success',
+      message: 'Lead ajouté à Google Sheets',
+      totalLeads: leads.length
+    });
+  } catch (error) {
+    res.status(400).json({ status: 'error', message: error.message });
+  }
+});
+
+app.post('/api/leads/sync', async (req, res) => {
+  try {
+    const leads = scraperManager.getLeads();
+    await googleSheetsDB.syncLeads(leads);
+    res.json({
+      status: 'success',
+      message: 'Synchronisation effectuée',
+      totalLeads: leads.length
+    });
+  } catch (error) {
+    res.status(400).json({ status: 'error', message: error.message });
+  }
+});
+
+app.post('/api/leads/reset', async (req, res) => {
+  try {
+    scraperManager.reset();
+    res.json({ status: 'success', message: 'Données réinitialisées' });
+  } catch (error) {
+    res.status(400).json({ status: 'error', message: error.message });
+  }
 });
 
 app.get('/api/status', (req, res) => {

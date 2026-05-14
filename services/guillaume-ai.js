@@ -373,6 +373,21 @@ class GuillaumeAI {
   }
 
   /**
+   * Sauvegarde les leads dans Google Sheets après une action
+   */
+  async saveToGoogleSheets() {
+    try {
+      const googleSheetsDB = require('./google-sheets-db');
+      const leads = this.appContext.scraperManager.getLeads();
+      if (leads.length > 0) {
+        await googleSheetsDB.syncLeads(leads);
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde Google Sheets:', error.message);
+    }
+  }
+
+  /**
    * Envoie un message à Claude avec support des outils
    */
   async chat(userMessage) {
@@ -441,6 +456,9 @@ Réponds toujours en français avec des emojis.`,
       role: 'assistant',
       content: finalMessage
     });
+
+    // Sauvegarder dans Google Sheets après les actions
+    await this.saveToGoogleSheets();
 
     return finalMessage;
   }
