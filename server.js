@@ -4,9 +4,20 @@ const path = require('path');
 require('dotenv').config();
 
 const scraperManager = require('./scrapers');
+const GuillaumeAI = require('./services/guillaume-ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize Guillaume AI
+const apiKey = process.env.ANTHROPIC_API_KEY;
+if (!apiKey) {
+  console.warn('⚠️ ANTHROPIC_API_KEY not found in environment');
+}
+const guillaume = new GuillaumeAI(apiKey);
+
+// Set app context for Guillaume
+guillaume.setAppContext({ scraperManager });
 
 // Middleware
 app.use(cors());
@@ -83,6 +94,44 @@ app.post('/api/leads/reset', (req, res) => {
 
 app.get('/api/status', (req, res) => {
   res.json(scraperManager.getStatus());
+});
+
+// Guillaume AI Routes
+app.post('/api/guillaume/chat', async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message required' });
+    }
+
+    if (!apiKey) {
+      return res.status(503).json({
+        error: 'Guillaume AI not configured',
+        message: 'ANTHROPIC_API_KEY is missing'
+      });
+    }
+
+    const response = await guillaume.chat(message);
+    res.json({ response, timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Guillaume AI error:', error);
+    res.status(500).json({
+      error: 'Guillaume chat error',
+      message: error.message
+    });
+  }
+});
+
+app.post('/api/guillaume/reset', (req, res) => {
+  guillaume.resetHistory();
+  res.json({ status: 'reset', message: 'Historique de conversation réinitialisé' });
+});
+
+app.get('/api/guillaume/status', (req, res) => {
+  res.json({
+    configured: !!apiKey,
+    conversationLength: guillaume.conversationHistory.length
+  });
 });
 
 // Processus de scraping asynchrone

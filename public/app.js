@@ -154,5 +154,69 @@ function resetButtons() {
   isScrapingActive = false;
 }
 
+// Guillaume Chat
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+
+chatForm.addEventListener('submit', handleChatSubmit);
+
+async function handleChatSubmit(e) {
+  e.preventDefault();
+  const message = chatInput.value.trim();
+  if (!message) return;
+
+  // Afficher le message de l'utilisateur
+  appendMessage(message, 'user');
+  chatInput.value = '';
+
+  // Afficher le message de chargement
+  const loadingEl = appendMessage('●●●', 'assistant loading');
+
+  try {
+    const response = await fetch(`${API_URL}/guillaume/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    // Supprimer le message de chargement
+    if (loadingEl) loadingEl.remove();
+
+    if (data.response) {
+      appendMessage(data.response, 'assistant');
+      // Recharger les leads après une action de Guillaume
+      await loadLeads();
+    } else if (data.error) {
+      appendMessage(`❌ Erreur: ${data.error}`, 'assistant');
+    }
+  } catch (error) {
+    if (loadingEl) loadingEl.remove();
+    appendMessage(`❌ Erreur de connexion: ${error.message}`, 'assistant');
+  }
+}
+
+function appendMessage(content, type) {
+  const messageEl = document.createElement('div');
+  messageEl.className = `message ${type}`;
+  messageEl.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>`;
+  chatMessages.appendChild(messageEl);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return messageEl;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+async function askGuillaume(question) {
+  chatInput.value = question;
+  chatForm.dispatchEvent(new Event('submit'));
+}
+
 // Charger les leads toutes les 5 secondes pendant l'interface
 setInterval(loadLeads, 5000);

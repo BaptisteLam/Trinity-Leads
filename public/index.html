@@ -13,56 +13,94 @@
       <p>Scraper pour PDG/DG d'entreprises (10-300 employés)</p>
     </header>
 
-    <main>
-      <!-- Panel de Contrôle -->
-      <section class="control-panel">
-        <button id="startBtn" class="btn btn-primary">▶ Lancer le Scraping</button>
-        <button id="stopBtn" class="btn btn-secondary" disabled>⏹ Arrêter</button>
-        <button id="exportBtn" class="btn btn-success">📥 Exporter CSV</button>
-      </section>
+    <div class="main-layout">
+      <main>
+        <!-- Panel de Contrôle -->
+        <section class="control-panel">
+          <button id="startBtn" class="btn btn-primary">▶ Lancer le Scraping</button>
+          <button id="stopBtn" class="btn btn-secondary" disabled>⏹ Arrêter</button>
+          <button id="exportBtn" class="btn btn-success">📥 Exporter CSV</button>
+        </section>
 
-      <!-- Dashboard Stats -->
-      <section class="dashboard">
-        <div class="stat-card">
-          <h3>Total Leads</h3>
-          <p class="stat-value" id="totalLeads">0</p>
-        </div>
-        <div class="stat-card">
-          <h3>En Cours</h3>
-          <p class="stat-value" id="scrapingStatus">Arrêté</p>
-        </div>
-        <div class="stat-card">
-          <h3>Dernière MAJ</h3>
-          <p class="stat-value" id="lastUpdate">--:--</p>
-        </div>
-      </section>
+        <!-- Dashboard Stats -->
+        <section class="dashboard">
+          <div class="stat-card">
+            <h3>Total Leads</h3>
+            <p class="stat-value" id="totalLeads">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>En Cours</h3>
+            <p class="stat-value" id="scrapingStatus">Arrêté</p>
+          </div>
+          <div class="stat-card">
+            <h3>Dernière MAJ</h3>
+            <p class="stat-value" id="lastUpdate">--:--</p>
+          </div>
+        </section>
 
-      <!-- Status Bar -->
-      <div id="statusBar" class="status-bar">
-        Prêt à démarrer le scraping
-      </div>
+        <!-- Status Bar -->
+        <div id="statusBar" class="status-bar">
+          Prêt à démarrer le scraping
+        </div>
 
-      <!-- Tableau des Leads -->
-      <section class="leads-table">
-        <h2>Liste des Leads</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Prénom</th>
-              <th>Secteur</th>
-              <th>Email</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="leadsBody">
-            <tr>
-              <td colspan="5" class="empty">Aucun lead pour le moment</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </main>
+        <!-- Tableau des Leads -->
+        <section class="leads-table">
+          <h2>Liste des Leads</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Secteur</th>
+                <th>Email</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="leadsBody">
+              <tr>
+                <td colspan="5" class="empty">Aucun lead pour le moment</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+
+      <!-- Guillaume AI Assistant Chat -->
+      <aside class="guillaume-panel">
+        <div class="guillaume-header">
+          <h2>🤖 Guillaume</h2>
+          <p class="subtitle">Assistant IA</p>
+        </div>
+
+        <div class="chat-container">
+          <div id="chatMessages" class="chat-messages">
+            <div class="message assistant">
+              <div class="message-content">
+                👋 Salut! Je suis Guillaume, ton assistant IA. Je peux t'aider à analyser les leads, valider les emails, générer des insights et contrôler le scraping.
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <form id="chatForm" onsubmit="return sendMessage(event)">
+              <input
+                type="text"
+                id="chatInput"
+                placeholder="Demande à Guillaume..."
+                autocomplete="off"
+              />
+              <button type="submit" class="btn-send">Envoyer</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="askGuillaume('Analyse les leads et donne-moi un rapport de qualité')">📊 Rapport</button>
+          <button class="quick-btn" onclick="askGuillaume('Valide tous les emails et supprime les invalides')">✅ Valider</button>
+          <button class="quick-btn" onclick="askGuillaume('Classifie les leads par secteur')">📁 Classifier</button>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <script src="app.js"></script>
