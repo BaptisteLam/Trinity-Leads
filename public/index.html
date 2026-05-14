@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trinity Leads - Lead Scraper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 Trinity Leads Scraper</h1>
+      <p>Scraper pour PDG/DG d'entreprises (10-300 employés)</p>
+    </header>
+
+    <main>
+      <!-- Panel de Contrôle -->
+      <section class="control-panel">
+        <button id="startBtn" class="btn btn-primary">▶ Lancer le Scraping</button>
+        <button id="stopBtn" class="btn btn-secondary" disabled>⏹ Arrêter</button>
+        <button id="exportBtn" class="btn btn-success">📥 Exporter CSV</button>
+      </section>
+
+      <!-- Dashboard Stats -->
+      <section class="dashboard">
+        <div class="stat-card">
+          <h3>Total Leads</h3>
+          <p class="stat-value" id="totalLeads">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>En Cours</h3>
+          <p class="stat-value" id="scrapingStatus">Arrêté</p>
+        </div>
+        <div class="stat-card">
+          <h3>Dernière MAJ</h3>
+          <p class="stat-value" id="lastUpdate">--:--</p>
+        </div>
+      </section>
+
+      <!-- Status Bar -->
+      <div id="statusBar" class="status-bar">
+        Prêt à démarrer le scraping
+      </div>
+
+      <!-- Tableau des Leads -->
+      <section class="leads-table">
+        <h2>Liste des Leads</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Secteur</th>
+              <th>Email</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="leadsBody">
+            <tr>
+              <td colspan="5" class="empty">Aucun lead pour le moment</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
